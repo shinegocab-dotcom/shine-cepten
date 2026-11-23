@@ -1,0 +1,492 @@
+{
+  "entities": {
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Super Admin allowlist entry granting administrative privileges across SHINE CAPTAIN.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "role": { "type": "string", "enum": ["super_admin", "ops_admin"] },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "role", "created_at"]
+    },
+    "DriverProfile": {
+      "title": "DriverProfile",
+      "description": "Captain profile with onboarding status, KYC gate, avatar Data URL, and live online flag.",
+      "type": "object",
+      "properties": {
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "user_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "full_name": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "phone": { "type": "string", "minLength": 10, "maxLength": 20 },
+        "email": { "type": "string", "maxLength": 200 },
+        "city": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "date_of_birth": { "type": "string", "maxLength": 32 },
+        "emergency_contact_name": { "type": "string", "maxLength": 120 },
+        "emergency_contact_phone": { "type": "string", "maxLength": 20 },
+        "avatar_url": { "type": "string", "maxLength": 800000 },
+        "profile_completed": { "type": "boolean" },
+        "documents_uploaded": { "type": "boolean" },
+        "vehicle_verified": { "type": "boolean" },
+        "kyc_status": { "type": "string", "enum": ["not_submitted", "pending", "under_review", "approved", "rejected"] },
+        "kyc_rejection_reason": { "type": "string", "maxLength": 500 },
+        "admin_approved": { "type": "boolean" },
+        "account_status": { "type": "string", "enum": ["pending_setup", "pending_approval", "active", "suspended", "rejected"] },
+        "partner_rider_id": { "type": "string", "maxLength": 64 },
+        "short_id": { "type": "string", "maxLength": 32 },
+        "driverCode": { "type": "string", "maxLength": 16 },
+        "is_online": { "type": "boolean" },
+        "active_vehicle_id": { "type": "string", "maxLength": 128 },
+        "rating_average": { "type": "number" },
+        "total_rides": { "type": "integer" },
+        "weekly_goal_inr": { "type": "number" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "heading": { "type": "number" },
+        "speed_kmh": { "type": "number" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["driver_id", "user_id", "full_name", "phone", "city", "profile_completed", "documents_uploaded", "vehicle_verified", "kyc_status", "admin_approved", "account_status", "is_online", "total_rides", "created_at", "updated_at"]
+    },
+    "DriverLocation": {
+      "title": "DriverLocation",
+      "description": "Real-time non-PII telemetry coordinates, heading, speed in km/h, and online status.",
+      "type": "object",
+      "properties": {
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "heading": { "type": "number" },
+        "speed_kmh": { "type": "number" },
+        "accuracy_m": { "type": "number" },
+        "is_online": { "type": "boolean" },
+        "vehicle_category": { "type": "string", "enum": ["bike", "auto", "cab"] },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["driver_id", "lat", "lng", "is_online", "updated_at"]
+    },
+    "Vehicle": {
+      "title": "Vehicle",
+      "description": "Registered Bike, Auto, or Cab associated with a SHINE CAPTAIN driver.",
+      "type": "object",
+      "properties": {
+        "vehicle_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "category": { "type": "string", "enum": ["bike", "auto", "cab"] },
+        "make": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "model": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "year": { "type": "integer" },
+        "color": { "type": "string", "maxLength": 40 },
+        "registration_number": { "type": "string", "minLength": 4, "maxLength": 24 },
+        "permit_number": { "type": "string", "maxLength": 64 },
+        "insurance_expiry": { "type": "string", "maxLength": 32 },
+        "rc_expiry": { "type": "string", "maxLength": 32 },
+        "verification_status": { "type": "string", "enum": ["pending", "verified", "rejected"] },
+        "is_active": { "type": "boolean" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["vehicle_id", "driver_id", "category", "make", "model", "year", "color", "registration_number", "verification_status", "is_active", "created_at", "updated_at"]
+    },
+    "DriverDocument": {
+      "title": "DriverDocument",
+      "description": "Compressed KYC document or selfie saved as a lightweight Data URL for direct Super Admin review.",
+      "type": "object",
+      "properties": {
+        "document_id": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "document_type": { "type": "string", "enum": ["driving_license", "vehicle_rc", "vehicle_insurance", "vehicle_permit", "vehicle_puc", "vehicle_photo", "aadhaar_or_national_id", "pan_card", "driver_selfie"] },
+        "storage_path": { "type": "string", "maxLength": 300 },
+        "file_url": { "type": "string", "maxLength": 800000 },
+        "file_name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "status": { "type": "string", "enum": ["not_uploaded", "pending_review", "verified", "rejected"] },
+        "rejection_reason": { "type": "string", "maxLength": 500 },
+        "uploaded_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["document_id", "driver_id", "document_type", "storage_path", "file_url", "file_name", "status", "uploaded_at"]
+    },
+    "Ride": {
+      "title": "Ride",
+      "description": "Real-time ride dispatch and lifecycle document shared between Customer App, Driver App, and Super Admin.",
+      "type": "object",
+      "properties": {
+        "ride_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "customer_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "maxLength": 128 },
+        "vehicle_id": { "type": "string", "maxLength": 128 },
+        "vehicle_category": { "type": "string", "enum": ["bike", "auto", "cab"] },
+        "status": { "type": "string", "enum": ["searching", "requested", "offered", "accepted", "arriving", "arrived", "in_progress", "completed", "cancelled"] },
+        "pickup_address": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "pickup_lat": { "type": "number" },
+        "pickup_lng": { "type": "number" },
+        "dropoff_address": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "dropoff_lat": { "type": "number" },
+        "dropoff_lng": { "type": "number" },
+        "estimated_distance_km": { "type": "number" },
+        "estimated_duration_min": { "type": "number" },
+        "estimated_fare_inr": { "type": "number" },
+        "final_fare_inr": { "type": "number" },
+        "commission_inr": { "type": "number" },
+        "driver_net_inr": { "type": "number" },
+        "payment_mode": { "type": "string", "enum": ["cash", "online_upi", "card", "wallet"] },
+        "payment_status": { "type": "string", "enum": ["pending", "paid", "failed"] },
+        "pickup_otp": { "type": "string", "minLength": 4, "maxLength": 6 },
+        "pickup_otp_verified": { "type": "boolean" },
+        "cancellation_reason": { "type": "string", "maxLength": 240 },
+        "cancelled_by": { "type": "string", "enum": ["driver", "customer", "admin"] },
+        "offer_expires_at": { "type": "string", "maxLength": 64 },
+        "customer": { "type": "object" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "started_at": { "type": "string", "format": "date-time" },
+        "completed_at": { "type": "string", "format": "date-time" },
+        "driver_lat": { "type": "number" },
+        "driver_lng": { "type": "number" },
+        "driver_heading": { "type": "number" },
+        "driver_speed_kmh": { "type": "number" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ride_id", "customer_id", "vehicle_category", "status", "pickup_address", "pickup_lat", "pickup_lng", "dropoff_address", "dropoff_lat", "dropoff_lng", "estimated_distance_km", "estimated_duration_min", "estimated_fare_inr", "payment_mode", "payment_status", "pickup_otp_verified", "created_at", "updated_at"]
+    },
+    "RideMessage": {
+      "title": "RideMessage",
+      "description": "Real-time chat message between Captain and Customer for an active ride.",
+      "type": "object",
+      "properties": {
+        "message_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "ride_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "maxLength": 128 },
+        "customer_id": { "type": "string", "maxLength": 128 },
+        "sender_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "sender_role": { "type": "string", "enum": ["driver", "customer", "admin"] },
+        "sender_name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "text": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["message_id", "ride_id", "sender_id", "sender_role", "sender_name", "text", "created_at"]
+    },
+    "WalletAccount": {
+      "title": "WalletAccount",
+      "description": "Driver wallet balances, pending settlements, commission dues, and bank/UPI payout details.",
+      "type": "object",
+      "properties": {
+        "wallet_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "available_balance_inr": { "type": "number" },
+        "pending_settlement_inr": { "type": "number" },
+        "cash_commission_due_inr": { "type": "number" },
+        "bank_account_verified": { "type": "boolean" },
+        "bank_account_masked": { "type": "string", "maxLength": 80 },
+        "account_holder_name": { "type": "string", "maxLength": 120 },
+        "upi_id": { "type": "string", "maxLength": 120 },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["wallet_id", "driver_id", "available_balance_inr", "pending_settlement_inr", "cash_commission_due_inr", "bank_account_verified", "updated_at"]
+    },
+    "WalletTransaction": {
+      "title": "WalletTransaction",
+      "description": "Immutable driver wallet ledger entry for ride net credits, cash commissions, payout debits, and dues settlements.",
+      "type": "object",
+      "properties": {
+        "tx_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "wallet_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "ride_id": { "type": "string", "maxLength": 128 },
+        "payout_id": { "type": "string", "maxLength": 128 },
+        "tx_type": { "type": "string", "enum": ["ride_credit", "commission_debit", "payout_debit", "dues_settlement"] },
+        "amount_inr": { "type": "number" },
+        "description": { "type": "string", "minLength": 1, "maxLength": 400 },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["tx_id", "wallet_id", "driver_id", "tx_type", "amount_inr", "description", "created_at"]
+    },
+    "Payout": {
+      "title": "Payout",
+      "description": "Withdrawal/payout request submitted from the driver wallet.",
+      "type": "object",
+      "properties": {
+        "payout_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "amount_inr": { "type": "number" },
+        "status": { "type": "string", "enum": ["initiated", "processing", "settled", "failed"] },
+        "provider_reference": { "type": "string", "maxLength": 120 },
+        "destination_label": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "settled_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["payout_id", "driver_id", "amount_inr", "status", "destination_label", "requested_at"]
+    },
+    "Rating": {
+      "title": "Rating",
+      "description": "Customer rating and written review for a completed ride.",
+      "type": "object",
+      "properties": {
+        "rating_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "ride_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "customer_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "stars": { "type": "number" },
+        "comment": { "type": "string", "maxLength": 1000 },
+        "feedback_tags": { "type": "array" },
+        "customer_name": { "type": "string", "maxLength": 120 },
+        "pickup_address": { "type": "string", "maxLength": 300 },
+        "dropoff_address": { "type": "string", "maxLength": 300 },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["rating_id", "ride_id", "customer_id", "driver_id", "stars", "created_at"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Driver notification inbox item (KYC, ride dispatch, payout, safety, or system notice).",
+      "type": "object",
+      "properties": {
+        "notification_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "category": { "type": "string", "enum": ["kyc", "ride", "payout", "system", "safety"] },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "body": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "read": { "type": "boolean" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["notification_id", "driver_id", "category", "title", "body", "read", "created_at"]
+    },
+    "SupportTicket": {
+      "title": "SupportTicket",
+      "description": "Driver support request linked optionally to a ride ID.",
+      "type": "object",
+      "properties": {
+        "ticket_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "ride_id": { "type": "string", "maxLength": 128 },
+        "subject": { "type": "string", "minLength": 2, "maxLength": 200 },
+        "description": { "type": "string", "minLength": 2, "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["open", "in_review", "resolved"] },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ticket_id", "driver_id", "subject", "description", "status", "created_at"]
+    },
+    "SosAlert": {
+      "title": "SosAlert",
+      "description": "Emergency SOS escalation event logged with driver live GPS coordinates.",
+      "type": "object",
+      "properties": {
+        "alert_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "ride_id": { "type": "string", "maxLength": 128 },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "status": { "type": "string", "enum": ["triggered", "acknowledged", "resolved"] },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["alert_id", "driver_id", "status", "created_at"]
+    },
+    "DriverPhoneLookup": {
+      "title": "DriverPhoneLookup",
+      "description": "SHA-256 hashed phone lookup index containing non-PII status and driver ID routing metadata.",
+      "type": "object",
+      "properties": {
+        "phone_hash": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "display_name": { "type": "string", "maxLength": 120 },
+        "city": { "type": "string", "maxLength": 100 },
+        "vehicle_category": { "type": "string", "enum": ["bike", "auto", "cab"] },
+        "kyc_status": { "type": "string", "enum": ["not_submitted", "pending", "under_review", "approved", "rejected"] },
+        "admin_approved": { "type": "boolean" },
+        "account_status": { "type": "string", "enum": ["pending_setup", "pending_approval", "active", "suspended", "rejected"] },
+        "partner_rider_id": { "type": "string", "maxLength": 64 },
+        "short_id": { "type": "string", "maxLength": 32 },
+        "driverCode": { "type": "string", "maxLength": 16 },
+        "wallet_balance_inr": { "type": "number" },
+        "weekly_goal_inr": { "type": "number" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["phone_hash", "driver_id", "kyc_status", "admin_approved", "account_status", "updated_at"]
+    },
+    "DriverCodeLookup": {
+      "title": "DriverCodeLookup",
+      "description": "10-character PAN-style Driver ID lookup index containing masked phone and non-PII status routing metadata.",
+      "type": "object",
+      "properties": {
+        "driver_code": { "type": "string", "minLength": 4, "maxLength": 16 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "display_name": { "type": "string", "maxLength": 120 },
+        "masked_phone": { "type": "string", "maxLength": 24 },
+        "phone_hash": { "type": "string", "maxLength": 128 },
+        "city": { "type": "string", "maxLength": 100 },
+        "vehicle_category": { "type": "string", "enum": ["bike", "auto", "cab"] },
+        "kyc_status": { "type": "string", "enum": ["not_submitted", "pending", "under_review", "approved", "rejected"] },
+        "admin_approved": { "type": "boolean" },
+        "account_status": { "type": "string", "enum": ["pending_setup", "pending_approval", "active", "suspended", "rejected"] },
+        "partner_rider_id": { "type": "string", "maxLength": 64 },
+        "short_id": { "type": "string", "maxLength": 32 },
+        "driverCode": { "type": "string", "maxLength": 16 },
+        "wallet_balance_inr": { "type": "number" },
+        "weekly_goal_inr": { "type": "number" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["driver_code", "driver_id", "kyc_status", "admin_approved", "account_status", "updated_at"]
+    },
+    "FareConfig": {
+      "title": "FareConfig",
+      "description": "Live vehicle category fare rate card configured by Super Admin.",
+      "type": "object",
+      "properties": {
+        "config_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "vehicle_category": { "type": "string", "enum": ["bike", "auto", "cab"] },
+        "base_fare_inr": { "type": "number" },
+        "per_km_inr": { "type": "number" },
+        "per_min_inr": { "type": "number" },
+        "min_fare_inr": { "type": "number" },
+        "commission_pct": { "type": "number" },
+        "surge_multiplier": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 8 },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["config_id", "vehicle_category", "base_fare_inr", "per_km_inr", "per_min_inr", "min_fare_inr", "commission_pct"]
+    },
+    "SystemIntegrationLiveKeys": {
+      "title": "SystemIntegrationLiveKeys",
+      "description": "Public OTP/SMS integration toggles configured by Super Admin under system_integrations/live_keys.",
+      "type": "object",
+      "properties": {
+        "firebase_phone_otp_enabled": { "type": "boolean" },
+        "demo_otp_banner_enabled": { "type": "boolean" },
+        "sms_provider": { "type": "string", "maxLength": 64 },
+        "updated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CaptainLeaderboard": {
+      "title": "CaptainLeaderboard",
+      "description": "Non-PII weekly earnings and customer star rating leaderboard entry per Captain.",
+      "type": "object",
+      "properties": {
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "display_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "city": { "type": "string", "maxLength": 100 },
+        "vehicle_category": { "type": "string", "enum": ["bike", "auto", "cab"] },
+        "partner_rider_id": { "type": "string", "maxLength": 64 },
+        "short_id": { "type": "string", "maxLength": 32 },
+        "driverCode": { "type": "string", "maxLength": 16 },
+        "weekly_earnings_inr": { "type": "number" },
+        "weekly_rides": { "type": "integer" },
+        "rating_average": { "type": "number" },
+        "total_rides": { "type": "integer" },
+        "avatar_url": { "type": "string", "maxLength": 800000 },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["driver_id", "display_name", "vehicle_category", "weekly_earnings_inr", "weekly_rides", "total_rides", "updated_at"]
+    },
+    "CaptainAiMessage": {
+      "title": "CaptainAiMessage",
+      "description": "Persisted multi-turn Gemini Captain AI & Maps Grounding chat turn linked to driver_id.",
+      "type": "object",
+      "properties": {
+        "message_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "driver_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "role_id": { "type": "string", "enum": ["maps_navigator", "dispatch_strategist", "earnings_analyst", "quick_helper"] },
+        "sender": { "type": "string", "enum": ["user", "model"] },
+        "model_used": { "type": "string", "maxLength": 64 },
+        "text": { "type": "string", "minLength": 1, "maxLength": 8000 },
+        "maps_sources_json": { "type": "string", "maxLength": 16000 },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["message_id", "driver_id", "role_id", "sender", "text", "created_at"]
+    },
+    "ConnectionTest": {
+      "title": "ConnectionTest",
+      "description": "Read-only connection healthcheck sentinel document.",
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" }
+      }
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Super Admin role allowlist documents keyed by Firebase Auth UID."
+    },
+    "/drivers/{driverId}": {
+      "schema": { "$ref": "#/entities/DriverProfile" },
+      "description": "Driver partner profiles (PII protected: owner or admin read/write)."
+    },
+    "/driver_locations/{driverId}": {
+      "schema": { "$ref": "#/entities/DriverLocation" },
+      "description": "Non-PII real-time driver GPS coordinates, heading, and speed_kmh stream."
+    },
+    "/vehicles/{vehicleId}": {
+      "schema": { "$ref": "#/entities/Vehicle" },
+      "description": "Registered partner vehicles verified by Super Admin."
+    },
+    "/driver_documents/{docId}": {
+      "schema": { "$ref": "#/entities/DriverDocument" },
+      "description": "Compressed JPEG Data URL KYC documents and selfies synced directly to Admin Review."
+    },
+    "/rides/{rideId}": {
+      "schema": { "$ref": "#/entities/Ride" },
+      "description": "Live ride requests, atomic driver claim, pickup OTP verification, and completion ledger."
+    },
+    "/ride_messages/{messageId}": {
+      "schema": { "$ref": "#/entities/RideMessage" },
+      "description": "Real-time Driver-Customer chat messages linked to a ride_id."
+    },
+    "/wallet_accounts/{driverId}": {
+      "schema": { "$ref": "#/entities/WalletAccount" },
+      "description": "Driver earnings wallet, cash dues, and verified bank/UPI payout targets."
+    },
+    "/wallet_transactions/{txId}": {
+      "schema": { "$ref": "#/entities/WalletTransaction" },
+      "description": "Driver wallet ledger transactions for ride earnings, cash commission dues, and payouts."
+    },
+    "/payouts/{payoutId}": {
+      "schema": { "$ref": "#/entities/Payout" },
+      "description": "Driver withdrawal requests and settlement history."
+    },
+    "/ratings/{ratingId}": {
+      "schema": { "$ref": "#/entities/Rating" },
+      "description": "Verified passenger star ratings and written feedback for completed rides."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Real-time driver alert inbox."
+    },
+    "/support_tickets/{ticketId}": {
+      "schema": { "$ref": "#/entities/SupportTicket" },
+      "description": "Driver operations support tickets."
+    },
+    "/sos_alerts/{alertId}": {
+      "schema": { "$ref": "#/entities/SosAlert" },
+      "description": "Real-time emergency SOS alerts triggered by drivers."
+    },
+    "/driver_phone_lookup/{phoneHash}": {
+      "schema": { "$ref": "#/entities/DriverPhoneLookup" },
+      "description": "Hashed mobile number index for non-PII status and KYC routing on OTP verification."
+    },
+    "/driver_code_lookup/{driverCode}": {
+      "schema": { "$ref": "#/entities/DriverCodeLookup" },
+      "description": "10-character PAN-style Driver ID lookup index for OTP-assisted login by Captain ID."
+    },
+    "/fare_configs/{configId}": {
+      "schema": { "$ref": "#/entities/FareConfig" },
+      "description": "Live vehicle category fare configs synced from Super Admin."
+    },
+    "/system_integrations/{integrationId}": {
+      "schema": { "$ref": "#/entities/SystemIntegrationLiveKeys" },
+      "description": "Runtime integration flags such as system_integrations/live_keys."
+    },
+    "/captain_leaderboard/{driverId}": {
+      "schema": { "$ref": "#/entities/CaptainLeaderboard" },
+      "description": "Live weekly Top Captains leaderboard ranked by earnings and rating."
+    },
+    "/captain_ai_messages/{messageId}": {
+      "schema": { "$ref": "#/entities/CaptainAiMessage" },
+      "description": "Persisted multi-turn Gemini Captain Co-Pilot & Maps Grounding conversation history."
+    },
+    "/test/{docId}": {
+      "schema": { "$ref": "#/entities/ConnectionTest" },
+      "description": "Connectivity check document (/test/connection)."
+    }
+  }
+}

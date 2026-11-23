@@ -1,0 +1,9 @@
+{
+  "name": "@shine-cab/driver-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SHINE CAB DRIVER — Production-ready ride-hailing driver app for Bike, Auto, and Cab partners",
+  "scripts": {
+    "test": "tsx --test tests/driverWorkflow.test.ts"
+  }
+}

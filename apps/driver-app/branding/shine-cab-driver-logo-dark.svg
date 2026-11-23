@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 128" fill="none">
+  <rect width="128" height="128" rx="28" fill="#111111"/>
+  <rect x="2" y="2" width="124" height="124" rx="26" stroke="#FFC928" stroke-opacity="0.28" stroke-width="2.5"/>
+  <path d="M30 96L50 32H65L45 96H30Z" fill="#FFC928"/>
+  <path d="M63 96L83 32H98L78 96H63Z" fill="#FFC928"/>
+  <text x="150" y="74" fill="#FFFFFF" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="40" font-weight="800" letter-spacing="-0.02em">SHINE</text>
+  <rect x="284" y="42" width="120" height="38" rx="8" fill="#FFC928"/>
+  <text x="344" y="67" text-anchor="middle" fill="#111111" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="18" font-weight="800" letter-spacing="0.06em">CAPTAIN</text>
+</svg>

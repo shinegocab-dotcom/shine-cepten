@@ -1,0 +1,6 @@
+{
+  "name": "SHINE CAB DRIVER",
+  "description": "SHINE CAB DRIVER — Ride-hailing partner application for Bike, Auto, and Cab drivers in the SHINE CAB ecosystem. Drive • Earn • Grow.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

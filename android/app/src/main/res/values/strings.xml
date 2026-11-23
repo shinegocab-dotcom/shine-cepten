@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Shine Captain</string>
+    <string name="title_activity_main">Shine Captain</string>
+    <string name="package_name">com.shinecab.driver</string>
+    <string name="custom_url_scheme">com.shinecab.driver</string>
+</resources>
