@@ -79,13 +79,13 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   if (isFullBleedAuth) {
     return (
-      <div className="flex min-h-[100dvh] w-full flex-col overflow-x-hidden bg-[#1E1E1E] text-white">
+      <div className="flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[#1E1E1E] text-white">
         <div
           aria-hidden="true"
           className="sticky top-0 z-40 w-full shrink-0"
           style={{ height: 'max(env(safe-area-inset-top), 34px)', backgroundColor: '#111111' }}
         />
-        <div className="flex flex-1 flex-col overflow-y-auto overscroll-contain pb-[max(env(safe-area-inset-bottom),16px)]">
+        <div style={{ WebkitOverflowScrolling: "touch" }} className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-[max(env(safe-area-inset-bottom),24px)]">
           {children}
           <FeedbackToast />
         </div>
@@ -94,7 +94,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   }
 
   return (
-    <div className="relative flex min-h-[100dvh] w-full flex-col overflow-x-hidden bg-[#F6F7F9] text-[#1E1E1E] dark:bg-[#121212] dark:text-[#F5F5F7]">
+    <div className="relative flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[#F6F7F9] text-[#1E1E1E] dark:bg-[#121212] dark:text-[#F5F5F7]">
       {/* Top Android Safe-Area Spacer + Sticky Native Header */}
       <div className="sticky top-0 z-40 w-full shrink-0">
         <div
@@ -229,7 +229,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
       </div>
 
       {/* Full-Screen Scrollable Mobile App Canvas */}
-      <main className="w-full flex-1 overflow-y-auto overscroll-contain px-3.5 pt-3.5 pb-6">
+      <main style={{ WebkitOverflowScrolling: "touch" }} className="w-full min-h-0 flex-1 overflow-y-auto px-3.5 pt-3.5 pb-12">
         {children}
         <footer className="mt-6 flex justify-center border-t border-neutral-200/70 pt-4 dark:border-neutral-800/80">
           <BrandLogo size="xs" showTagline className="opacity-85" />
