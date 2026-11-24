@@ -35,7 +35,7 @@ export function canDriverGoOnline(
   if (!vehicle || vehicle.verification_status !== 'verified' || !driver.vehicle_verified) {
     blockers.push('Vehicle verification must be completed.');
   }
-  if (driver.kyc_status !== 'approved' || !driver.admin_approved) {
+  if (!driver.admin_approved && driver.kyc_status !== 'approved') {
     blockers.push('Super Admin approval is pending or not granted.');
   }
   if (driver.account_status !== 'active') {

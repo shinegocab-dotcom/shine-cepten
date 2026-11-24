@@ -53,6 +53,13 @@ export const EarningsScreen: React.FC = () => {
 
   const [goalInput, setGoalInput] = useState(String(weeklyGoalInr));
   const [savingGoal, setSavingGoal] = useState(false);
+  useEffect(() => {
+    void refreshDriverWorkspace();
+    const timer = setInterval(() => {
+      void refreshDriverWorkspace();
+    }, 8000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     setGoalInput(String(weeklyGoalInr));
@@ -1155,7 +1162,58 @@ export const WalletScreen: React.FC = () => {
 };
 
 export const PayoutHistoryScreen: React.FC = () => {
-  const { backendConfigured, payouts } = useDriverApp();
+  const {
+    backendConfigured,
+    driverProfile,
+    wallet,
+    earnings,
+    payouts,
+    refreshDriverWorkspace,
+    setFeedback,
+    navigate,
+  } = useDriverApp();
+  const [upiInput, setUpiInput] = useState(wallet?.upi_id || "");
+  const [clearing, setClearing] = useState(false);
+
+  const grossAmount = Number(wallet?.available_balance_inr ?? earnings?.gross_fare_inr ?? 0);
+  const adminCommissionDue = Number(wallet?.cash_commission_due_inr ?? earnings?.platform_commission_inr ?? 0);
+  const netPayable = Math.max(0, Number((grossAmount - adminCommissionDue).toFixed(2)));
+
+  const handleClearAndWithdraw = async () => {
+    if (!driverProfile) {
+      setFeedback({ type: "error", title: "Sign-In Required", message: "Please sign in first." });
+      return;
+    }
+    const targetUpi = (upiInput || wallet?.upi_id || "").trim();
+    if (!targetUpi || !targetUpi.includes("@")) {
+      setFeedback({ type: "error", title: "Valid UPI ID Required", message: "Enter a valid UPI ID (e.g. name@upi) to clear payout." });
+      return;
+    }
+    if (netPayable < 1) {
+      setFeedback({ type: "info", title: "No Clearable Balance", message: "Complete rides to build clearable balance after admin commission." });
+      return;
+    }
+    setClearing(true);
+    try {
+      const res = await driverBackendService.wallet.requestWithdrawal(driverProfile.driver_id, {
+        amount_inr: netPayable,
+        method: "upi",
+        destination: targetUpi,
+      });
+      if (res.ok) {
+        setFeedback({
+          type: "success",
+          title: "Payout & Commission Cleared",
+          message: `₹${netPayable.toFixed(2)} payout submitted after deducting ₹${adminCommissionDue.toFixed(2)} admin commission.`,
+        });
+        await refreshDriverWorkspace();
+      } else {
+        setFeedback({ type: "error", title: "Settlement Failed", message: res.error?.message || "Try again." });
+      }
+    } finally {
+      setClearing(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -1163,6 +1221,56 @@ export const PayoutHistoryScreen: React.FC = () => {
         title="Payout History"
         subtitle="Audit log of bank and UPI withdrawals"
       />
+
+      <section className="rounded-2xl bg-[#141414] p-4 text-white space-y-3 border border-neutral-800">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#FFC928]">
+            Commission &amp; Payout Settlement
+          </span>
+          <button
+            type="button"
+            onClick={() => navigate("wallet")}
+            className="text-xs font-semibold text-neutral-300 underline"
+          >
+            Open Wallet
+          </button>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 rounded-xl bg-neutral-900 p-3 text-xs">
+          <div>
+            <p className="text-neutral-400">Gross Bal</p>
+            <p className="mt-0.5 font-mono font-bold text-white">₹{grossAmount.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-neutral-400">Admin Comm.</p>
+            <p className="mt-0.5 font-mono font-bold text-red-400">-₹{adminCommissionDue.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-neutral-400">Net Payout</p>
+            <p className="mt-0.5 font-mono font-bold text-[#FFC928]">₹{netPayable.toFixed(2)}</p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-xs text-neutral-300">Captain UPI ID for Instant Settlement</label>
+          <input
+            type="text"
+            value={upiInput}
+            onChange={(e) => setUpiInput(e.target.value)}
+            placeholder="captain@oksbi"
+            className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#FFC928]"
+          />
+          <PrimaryButton
+            type="button"
+            variant="brand"
+            disabled={clearing}
+            onClick={handleClearAndWithdraw}
+            className="w-full"
+          >
+            {clearing ? "Clearing Commission..." : `Clear Commission & Withdraw ₹${netPayable.toFixed(2)}`}
+          </PrimaryButton>
+        </div>
+      </section>
 
       {!backendConfigured || payouts.length === 0 ? (
         <StateNotice

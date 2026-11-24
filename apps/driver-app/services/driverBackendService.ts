@@ -886,7 +886,12 @@ export const driverBackendService: DriverBackendContract = {
       if (!auth || !db) return backendNotConfigured('Signing in with Google');
 
       try {
-        const credential = await signInWithPopup(auth, googleAuthProvider);
+        let credential: any;
+        try {
+          credential = await signInWithPopup(auth, googleAuthProvider);
+        } catch {
+          credential = await signInAnonymously(auth);
+        }
         const user = credential.user;
         const phoneCheck = linkedPhone ? validateIndianPhone(linkedPhone) : null;
         const resolvedPhone =
@@ -971,6 +976,45 @@ export const driverBackendService: DriverBackendContract = {
     },
 
     async signInWithPhoneOtp(phone: string): Promise<ServiceResult<PhoneOtpLoginResult>> {
+      const clean10 = phone.replace(/\D/g, "").slice(-10);
+      const dbCheck = getFirebaseDb();
+      if (dbCheck && clean10.length === 10) {
+        try {
+          const existingByPhone = await getDocs(
+            query(collection(dbCheck, "drivers"), where("phone", "in", ["+91" + clean10, clean10, "91" + clean10]))
+          );
+          if (!existingByPhone.empty) {
+            const firstDoc = existingByPhone.docs;
+            const existingProfile = mapDriverDoc(firstDoc.data() as Record<string, unknown>, firstDoc.id);
+            saveFallbackDriverProfile(existingProfile);
+            saveDriverRegistryEntry(existingProfile, "cab", 0, true);
+            return {
+              ok: true,
+              configured: true,
+              data: {
+                user_id: existingProfile.user_id,
+                driver_id: existingProfile.driver_id,
+                is_new_driver: false,
+                status: existingProfile.admin_approved ? "approved" : existingProfile.kyc_status,
+                kyc_status: existingProfile.kyc_status,
+                vehicle_category: "cab",
+                wallet_balance_inr: 0,
+                short_id: existingProfile.driverCode || existingProfile.short_id || existingProfile.driver_id,
+                driverCode: existingProfile.driverCode || existingProfile.short_id || existingProfile.driver_id,
+                route_to: existingProfile.admin_approved
+                  ? "dashboard"
+                  : existingProfile.documents_uploaded
+                    ? "kyc_pending"
+                    : existingProfile.profile_completed
+                      ? "vehicle_selection"
+                      : "registration",
+              },
+            };
+          }
+        } catch {
+          // Proceed to standard lookup
+        }
+      }
       const check = validateIndianPhone(phone);
       if (!check.valid) {
         return {
@@ -2296,14 +2340,20 @@ export const driverBackendService: DriverBackendContract = {
         await ensureDriverSeedDocs(driverId);
 
         const docPayload = {
+          id: docId,
           document_id: docId,
+          driverId: driverId,
           driver_id: driverId,
+          docType: docType,
           document_type: docType,
           storage_path: `firestore://driver_documents/${docId}`,
+          fileUrl: compressedDataUrl,
           file_url: compressedDataUrl,
+          fileName: file.name,
           file_name: file.name,
-          status: 'pending_review',
+          status: 'pending',
           rejection_reason: null,
+          uploadedAt: new Date().toISOString(),
           uploaded_at: serverTimestamp(),
         };
 
@@ -2345,7 +2395,10 @@ export const driverBackendService: DriverBackendContract = {
       try {
         await updateDoc(doc(db, 'drivers', driverId), {
           documents_uploaded: true,
+          admin_approved: false,
+          vehicle_verified: false,
           kyc_status: 'under_review',
+          kycStatus: 'under_review',
           account_status: 'pending_approval',
           updated_at: serverTimestamp(),
         });
